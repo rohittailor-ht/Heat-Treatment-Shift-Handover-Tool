@@ -92,6 +92,23 @@
     .whatsapp-btn{background:#25D366;color:white}
     .kiosk-btn{background:#0f172a;color:#38bdf8;border:1px solid #38bdf8}
 
+    /* EMAIL SETTINGS PANEL */
+    .email-card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.08);padding:16px;margin-top:14px;border-left:4px solid #2563eb;transition:background .25s,color .25s}
+    body.dark .email-card{background:var(--darkcard);color:var(--darkink)}
+    .email-card h4{margin:0 0 12px 0;color:#1e3a8a;font-size:14px;display:flex;align-items:center;gap:8px}
+    body.dark .email-card h4{color:#91b4ff}
+    .email-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+    .email-field{display:flex;flex-direction:column;gap:4px}
+    .email-field label{font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.4px}
+    body.dark .email-field label{color:#9fb0c3}
+    .email-field input{border:1px solid #cbd5e1;border-radius:8px;padding:7px 10px;background:#fff;font-size:13px;width:100%;transition:border .2s}
+    .email-field input:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+    body.dark .email-field input{background:#1e2a3b;color:var(--darkink);border:1px solid #334155}
+    .email-note{font-size:11px;color:#94a3b8;margin-top:8px;padding:8px;background:#f8fafc;border-radius:6px;border:1px dashed #cbd5e1}
+    body.dark .email-note{background:#0b1220;border-color:#334155;color:#6b7280}
+    .send-email-btn{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:white}
+    @media(max-width:768px){.email-grid{grid-template-columns:1fr}}
+
     /* Summary */
     .summary.card{display:flex;gap:16px;flex-wrap:wrap;justify-content:space-around;font-size:14px;font-weight:700}
     .notes.card textarea{width:100%}
@@ -425,6 +442,55 @@
       <button class="btn-small" onclick="clearSignature()">Clear Signature</button>
     </div>
 
+    <div class="email-card" id="emailSettingsCard">
+      <h4>📧 Email Recipients &amp; Send Report</h4>
+      <div class="email-grid">
+        <div class="email-field">
+          <label>To (Primary)</label>
+          <input type="email" id="emailTo" value="jagdish.jangir@nbcbearings.in" placeholder="primary@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 1</label>
+          <input type="email" id="emailCc1" value="rohit.tailor@nbcbearings.in" placeholder="cc1@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 2</label>
+          <input type="email" id="emailCc2" value="laxman.nayak@nbcbearings.in" placeholder="cc2@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 3</label>
+          <input type="email" id="emailCc3" value="anmol.jain@nbcbearings.in" placeholder="cc3@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 4</label>
+          <input type="email" id="emailCc4" value="mritunjay.kumar@nbcbearings.in" placeholder="cc4@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 5</label>
+          <input type="email" id="emailCc5" value="Prashant.dwivedi@nbcbearings.in" placeholder="cc5@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 6</label>
+          <input type="email" id="emailCc6" value="lalit.dashariya@nbcbearings.in" placeholder="cc6@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 7</label>
+          <input type="email" id="emailCc7" value="aswant.markandey@nbcbearings.in" placeholder="cc7@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 8</label>
+          <input type="email" id="emailCc8" placeholder="cc8@nbcbearings.in">
+        </div>
+        <div class="email-field">
+          <label>CC – 9</label>
+          <input type="email" id="emailCc9" placeholder="cc9@nbcbearings.in">
+        </div>
+      </div>
+      <div class="email-note">
+        💡 <b>How it works:</b> Tapping <b>📧 Send Email</b> will open your phone's default email app with the message body pre-filled, all recipients added, and the shift date &amp; shift name in the subject line. Attach the saved <b>.json</b> and <b>screenshot</b> files manually before sending.
+      </div>
+    </div>
+
     <div class="btns" id="mainBtns">
       <button class="btn shot" onclick="exportScreenshot()">📸 Screenshot (HD)</button>
       <button class="btn pdf" onclick="exportPDF()">Export to PDF</button>
@@ -435,6 +501,7 @@
       <button class="btn ai-btn" onclick="generateSmartSummary()">🤖 AI Summary</button>
       <button class="btn whatsapp-btn" onclick="generateSmartSummary()">📲 WhatsApp</button>
       <button class="btn kiosk-btn" onclick="toggleKiosk()">📺 Kiosk Mode</button>
+      <button class="btn send-email-btn" onclick="sendShiftEmail()">📧 Send Email</button>
       <input type="file" id="loadFileInput" accept=".json" style="display:none" onchange="handleLoadFile(event)">
     </div>
 
@@ -932,7 +999,24 @@
   async function exportScreenshot(){
     const btns=document.querySelector('.btns');
     btns.style.display='none';
+
+    // Replace every textarea with a plain div so full text is visible in screenshot
+    const replacements=[];
+    document.querySelectorAll('textarea.auto-expand').forEach(ta=>{
+      const div=document.createElement('div');
+      div.textContent=ta.value;
+      div.style.cssText=`font-family:inherit;font-size:inherit;width:100%;padding:8px 10px;
+        box-sizing:border-box;white-space:pre-wrap;word-break:break-word;
+        border:1px solid #cbd5e1;border-radius:10px;background:inherit;
+        min-height:32px;color:inherit;line-height:1.5`;
+      ta.parentNode.insertBefore(div,ta);
+      ta.style.display='none';
+      replacements.push({ta,div});
+    });
+
     window.scrollTo(0,0);
+    // Allow DOM to reflow with new heights
+    await new Promise(r=>setTimeout(r,120));
     try{
       const fullW=Math.max(document.body.scrollWidth,document.documentElement.scrollWidth);
       const fullH=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
@@ -951,6 +1035,9 @@
       document.body.appendChild(link);link.click();document.body.removeChild(link);
       toast('📸 Screenshot saved','success');
     }catch(e){toast('❌ Screenshot error: '+e.message,'error');}
+
+    // Restore textareas
+    replacements.forEach(({ta,div})=>{ta.style.display='';div.remove();});
     btns.style.display='flex';
   }
 
@@ -1259,6 +1346,95 @@
   document.getElementById('shiftDate').value = new Date().toISOString().split('T')[0];
   updateSummary();
   toast('🏭 Shift Report V6 loaded — Press Ctrl+K for quick commands','info');
+
+  // ─────────────────────────────────────────────────
+  //  SEND EMAIL  (Web Share API — attaches files)
+  // ─────────────────────────────────────────────────
+  async function sendShiftEmail(){
+    const toEmail = (document.getElementById('emailTo').value||'').trim();
+    if(!toEmail){toast('Please enter a primary (To) email address.','error');return;}
+
+    const ccIds=['emailCc1','emailCc2','emailCc3','emailCc4','emailCc5','emailCc6','emailCc7','emailCc8','emailCc9'];
+    const ccEmails=ccIds.map(id=>document.getElementById(id).value.trim()).filter(v=>v.length>0);
+
+    const shiftVal  = document.getElementById('shiftSel').value||'N/A';
+    const shiftDate = document.getElementById('shiftDate').value||new Date().toISOString().split('T')[0];
+    const createdBy = (document.getElementById('createdBy').value||'Shift Manager').trim();
+    const notes     = (document.getElementById('notes').value||'').trim();
+    const subject   = 'Shift Report of '+shiftDate+' '+shiftVal;
+
+    // Collect rows
+    const rows=[];
+    document.querySelectorAll('#tbody tr').forEach(tr=>{
+      rows.push({
+        name    :tr.querySelector('.mName')?.textContent?.trim()||'',
+        status  :tr.querySelector('select')?.value||'',
+        material:tr.querySelectorAll('textarea')[0]?.value?.trim()||'',
+        remarks :tr.querySelectorAll('textarea')[1]?.value?.trim()||'',
+        dpm     :tr.querySelector('.dpm-select')?.value||''
+      });
+    });
+
+    const running=rows.filter(r=>/run|produc/i.test(r.status)).length;
+    const down=rows.length-running;
+
+    // Status emoji indicators
+    const statusEmoji={
+      'In Production':'✅','Under Maintenance':'⚠️','TUS Running':'ὓ6',
+      'Cool down':'❄️','Burn off':'ὒ5','Heating up':'ἲ1️',
+      'Planned Shut Down':'⏸️','Gas charge running':'⛽',
+      'No Manpower':'Ὢb','Idle':'⏺️'
+    };
+    const dpmDisp=v=>v==='approved'?'✅':v==='rejected'?'❌':'—';
+
+    // Build plain-text table with unicode borders (renders perfectly in all mail apps)
+    const col1=22, col2=22, col3=20, col4=28, col5=8;
+    const pad=(s,n)=>{s=String(s||'—');return s.length>n?s.substring(0,n-1):s+' '.repeat(n-s.length);};
+
+    const top   ='┌'+'─'.repeat(col1)+'┬'+'─'.repeat(col2)+'┬'+'─'.repeat(col3)+'┬'+'─'.repeat(col4)+'┬'+'─'.repeat(col5)+'┐';
+    const sep   ='├'+'─'.repeat(col1)+'┼'+'─'.repeat(col2)+'┼'+'─'.repeat(col3)+'┼'+'─'.repeat(col4)+'┼'+'─'.repeat(col5)+'┤';
+    const bot   ='└'+'─'.repeat(col1)+'┴'+'─'.repeat(col2)+'┴'+'─'.repeat(col3)+'┴'+'─'.repeat(col4)+'┴'+'─'.repeat(col5)+'┘';
+    const hdr   ='│'+pad('Machine',col1)+'│'+pad('Status',col2)+'│'+pad('Material',col3)+'│'+pad('Remarks',col4)+'│'+pad('DPM',col5)+'│';
+
+    let tbl=top+'\n'+hdr+'\n'+sep+'\n';
+    rows.forEach(r=>{
+      const emoji=statusEmoji[r.status]||' ';
+      const statusStr=(r.status?emoji+' '+r.status:'—');
+      tbl+='│'+pad(r.name,col1)+'│'+pad(statusStr,col2)+'│'+pad(r.material,col3)+'│'+pad(r.remarks,col4)+'│'+pad(dpmDisp(r.dpm),col5)+'│'+'\n';
+    });
+    tbl+=bot;
+
+    const body
+      ='Dear Sir,'
+      +'\n\nPlease find below the complete shift summary report for your review.'
+      +'\n'
+      +'\n┌──────────────────────────────────┐'
+      +'\n│  SHIFT DETAILS                    │'
+      +'\n├──────────────────────────────────┤'
+      +'\n│  Shift       : '+pad(shiftVal,20)+'│'
+      +'\n│  Date        : '+pad(shiftDate,20)+'│'
+      +'\n│  Prepared By : '+pad(createdBy,20)+'│'
+      +'\n│  ✅ Running   : '+pad(running+' machines',20)+'│'
+      +'\n│  ⚠️ Down/Other : '+pad(down+' machines',20)+'│'
+      +'\n└──────────────────────────────────┘'
+      +'\n\nMACHINE-WISE SHIFT SUMMARY\n'
+      +tbl
+      +(notes?'\n\nSHIFT NOTES:\n'+notes:'')
+      +'\n\nBest regards,'
+      +'\n'+createdBy
+      +'\nShift Manager – LDB Heat Treatment Division'
+      +'\nNational Engineering Industries Ltd. (NBC Bearings)';
+
+    const ccPart=ccEmails.length?'&cc='+encodeURIComponent(ccEmails.join(',')):'';
+    const mailto='mailto:'+encodeURIComponent(toEmail)
+      +'?subject='+encodeURIComponent(subject)
+      +ccPart
+      +'&body='+encodeURIComponent(body);
+
+    window.location.href=mailto;
+    toast('Mail app opened with full shift summary!','success');
+  }
+  window.sendShiftEmail = sendShiftEmail;
 </script>
 </body>
 </html>
